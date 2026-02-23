@@ -24,6 +24,9 @@
     const PROXY_URL = "https://mealplannerapp.pankhuris.workers.dev";
     // =====================================================================
 
+    const PASSWORD = "beninnihome27";
+    const PROTECTED_TABS = ["custom", "myrecipes", "favorites"];
+
     const { useState, useEffect } = React;
 
     const FRANKFURT_LAT = 50.1109;
@@ -254,6 +257,9 @@
     }
 
     function MealPlanner() {
+      const [unlocked,       setUnlocked]       = useState(false);
+      const [pwInput,        setPwInput]        = useState("");
+      const [pwError,        setPwError]        = useState(false);
       const [weather,        setWeather]        = useState(null);
       const [meals,          setMeals]          = useState(null);
       const [loading,        setLoading]        = useState(false);
@@ -363,6 +369,23 @@
       const addMyRecipe    = async () => { if (!newRecipe.name.trim()) return; const u = [...myRecipes, { ...newRecipe, id: Date.now() }]; setMyRecipes(u); await storage.set("my-recipes", JSON.stringify(u)); setNewRecipe({ name:"", description:"", cuisine:"", meal_type:"either" }); setShowAddForm(false); };
       const removeMyRecipe = async (id) => { const u = myRecipes.filter(r => r.id !== id); setMyRecipes(u); await storage.set("my-recipes", JSON.stringify(u)); };
 
+      const tryUnlock = () => {
+        if (pwInput === PASSWORD) {
+          sessionStorage.setItem("mp_unlocked", "1");
+          setUnlocked(true);
+          setPwError(false);
+          setPwInput("");
+        } else {
+          setPwError(true);
+          setPwInput("");
+        }
+      };
+      const lockApp = () => {
+        sessionStorage.removeItem("mp_unlocked");
+        setUnlocked(false);
+        setActiveTab("today");
+      };
+
       const inp = { width:"100%", padding:"10px 14px", border:"1.5px solid #c8e6c9", borderRadius:6, fontFamily:"'DM Sans',sans-serif", fontSize:14, color:"#1b3a1f", background:"#f9fbe7", outline:"none" };
       const C   = { headerBg:"linear-gradient(135deg,#1b5e20 0%,#2e7d32 40%,#558b2f 100%)", accent1:"#e53935", accent2:"#f9a825", green:"#2e7d32", greenMid:"#4caf50", bodyBg:"#f1f8e9", cardBg:"#ffffff", textDark:"#1b3a1f", textMid:"#4a7a4e", textLight:"#7aad7e" };
 
@@ -427,11 +450,18 @@
 
           {/* TABS */}
           <div className="tabs-bar">
-            <button className={`tab${activeTab==="today"?" active":""}`}       onClick={()=>setActiveTab("today")}>Today's Meals</button>
-            <button className={`tab${activeTab==="custom"?" active":""}`}      onClick={()=>setActiveTab("custom")}>✨ Custom Recipe</button>
-            <button className={`tab${activeTab==="myrecipes"?" active":""}`}   onClick={()=>setActiveTab("myrecipes")}>My Recipes{myRecipes.length>0?` (${myRecipes.length})`:""}</button>
-            <button className={`tab${activeTab==="favorites"?" active":""}`}   onClick={()=>setActiveTab("favorites")}>Saved{favorites.length>0?` (${favorites.length})`:""}</button>
+            <button className={`tab${activeTab==="today"?" active":""}`} onClick={()=>setActiveTab("today")}>Today's Meals</button>
+            <button className={`tab${activeTab==="custom"?" active":""}`} onClick={()=>{ if(unlocked){setActiveTab("custom");}else{setActiveTab("custom");} }}>
+              {!unlocked && "🔒 "}✨ Custom Recipe
+            </button>
+            <button className={`tab${activeTab==="myrecipes"?" active":""}`} onClick={()=>setActiveTab("myrecipes")}>
+              {!unlocked && "🔒 "}My Recipes{myRecipes.length>0 && unlocked?` (${myRecipes.length})`:""}
+            </button>
+            <button className={`tab${activeTab==="favorites"?" active":""}`} onClick={()=>setActiveTab("favorites")}>
+              {!unlocked && "🔒 "}Saved{favorites.length>0 && unlocked?` (${favorites.length})`:""}
+            </button>
             <button className={`tab${activeTab==="conversions"?" active":""}`} onClick={()=>setActiveTab("conversions")}>📏 Conversions</button>
+            {unlocked && <button className="tab" onClick={lockApp} style={{color:"#e53935"}}>🔓 Lock</button>}
           </div>
 
           <div style={{ maxWidth:740, margin:"0 auto", padding:"30px 16px" }}>
@@ -442,7 +472,7 @@
                 <div style={{ textAlign:"center", padding:"44px 0" }}>
                   <div style={{ fontSize:52, marginBottom:10 }}>🥗</div>
                   <p style={{ fontStyle:"italic", color:C.textMid, marginBottom:8, fontSize:16, lineHeight:1.7 }}>
-                    Let me cook up something <strong>healthy, fibre-rich and protein-packed</strong><br/>for you and your family today!
+                    Let me cook up something <strong>healthy, fibre-rich and protein-packed</strong><br/>for you and your husband today!
                   </p>
                   {myRecipes.length > 0 && (
                     <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.textLight, marginBottom:26 }}>
@@ -542,8 +572,32 @@
               )}
             </>}
 
+            {/* PASSWORD GATE */}
+            {PROTECTED_TABS.includes(activeTab) && !unlocked && (
+              <div className="fi" style={{ textAlign:"center", padding:"60px 20px" }}>
+                <div style={{ fontSize:48, marginBottom:12 }}>🔒</div>
+                <h2 style={{ margin:"0 0 8px", fontSize:20, fontWeight:700 }}>Private Area</h2>
+                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:14, color:"#4a7a4e", marginBottom:24, lineHeight:1.6 }}>
+                  This section is password protected.<br/>Enter your password to continue.
+                </p>
+                <div style={{ maxWidth:280, margin:"0 auto", display:"flex", flexDirection:"column", gap:12 }}>
+                  <input
+                    type="password"
+                    placeholder="Enter password"
+                    value={pwInput}
+                    onChange={e=>{setPwInput(e.target.value); setPwError(false);}}
+                    onKeyDown={e=>e.key==="Enter"&&tryUnlock()}
+                    style={{ width:"100%", padding:"12px 16px", border:`2px solid ${pwError?"#e53935":"#c8e6c9"}`, borderRadius:8, fontFamily:"'DM Sans',sans-serif", fontSize:15, outline:"none", textAlign:"center", letterSpacing:"0.1em" }}
+                    autoFocus
+                  />
+                  {pwError && <p style={{ color:"#e53935", fontFamily:"'DM Sans',sans-serif", fontSize:13, margin:0 }}>Incorrect password, try again.</p>}
+                  <button className="bgr" onClick={tryUnlock} style={{ padding:"12px" }}>Unlock 🔓</button>
+                </div>
+              </div>
+            )}
+
             {/* CUSTOM RECIPE */}
-            {activeTab==="custom" && (
+            {activeTab==="custom" && unlocked && (
               <div className="fi">
                 <h2 style={{ margin:"0 0 4px", fontSize:21, fontWeight:700 }}>✨ Custom Recipe</h2>
                 <p style={{ margin:"0 0 20px", fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.textMid, lineHeight:1.6 }}>
@@ -599,7 +653,7 @@
             )}
 
             {/* MY RECIPES */}
-            {activeTab==="myrecipes" && (
+            {activeTab==="myrecipes" && unlocked && (
               <div className="fi">
                 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20, flexWrap:"wrap", gap:12 }}>
                   <div>
@@ -658,7 +712,7 @@
             )}
 
             {/* SAVED */}
-            {activeTab==="favorites" && (
+            {activeTab==="favorites" && unlocked && (
               <div className="fi">
                 <h2 style={{ margin:"0 0 18px", fontSize:21, fontWeight:700 }}>Saved Recipes</h2>
                 {favorites.length===0
