@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dr. Pankhuri Saxena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #FAF7F2;
+      --bg-alt:     #F3EDE3;
+      --card:       #FFFDF8;
+      --border:     #E8DDD0;
+
+      --green:      #7DA87B;
+      --green-soft: #C9DEC8;
+      --yellow:     #C8A55E;
+      --yellow-soft:#EED9A8;
+      --blue:       #6B97B0;
+      --blue-soft:  #C2D9E8;
+
+      --text:       #3A332C;
+      --text-mid:   #6B5F56;
+      --text-light: #9C8F85;
+
+      --radius:     12px;
+      --radius-sm:  8px;
+      --shadow:     0 2px 16px rgba(90,70,50,.07);
+      --shadow-md:  0 4px 28px rgba(90,70,50,.11);
+
+      --serif:      'Lora', Georgia, serif;
+      --sans:       'Inter', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ── Nav ──────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(250,247,242,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 clamp(1rem, 5vw, 4rem);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+
+    .nav-brand {
+      font-family: var(--serif);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: .01em;
+      white-space: nowrap;
+    }
+
+    .nav-brand span {
+      color: var(--text-mid);
+      font-weight: 400;
+    }
+
+    /* ── Hero ─────────────────────────────────────────────── */
+    .hero {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: clamp(3rem, 8vw, 6rem) clamp(1.5rem, 5vw, 2.5rem) clamp(2.5rem, 6vw, 5rem);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: clamp(2rem, 5vw, 4rem);
+      align-items: center;
+    }
+
+    .hero-photo-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .hero-photo {
+      width: clamp(150px, 22vw, 210px);
+      height: clamp(150px, 22vw, 210px);
+      border-radius: 50%;
+      object-fit: cover;
+      object-position: center top;
+      border: 4px solid var(--card);
+      box-shadow: var(--shadow-md), 0 0 0 8px var(--green-soft);
+      display: block;
+    }
+
+    .hero-text {}
+
+    .hero-name {
+      font-family: var(--serif);
+      font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--text);
+      margin-bottom: .45rem;
+    }
+
+    .hero-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-bottom: 1rem;
+    }
+
+    .pill {
+      font-size: .75rem;
+      font-weight: 500;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: .3rem .85rem;
+      border-radius: 100px;
+    }
+
+    .pill-green  { background: var(--green-soft);  color: #3a6038; }
+    .pill-yellow { background: var(--yellow-soft); color: #7a5a10; }
+    .pill-blue   { background: var(--blue-soft);   color: #2a5a72; }
+
+    .hero-tagline {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: clamp(.95rem, 2vw, 1.1rem);
+      color: var(--text-mid);
+      margin-bottom: 1.4rem;
+      max-width: 480px;
+      line-height: 1.6;
+    }
+
+    .hero-contact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .9rem;
+    }
+
+    .hero-contact a,
+    .hero-contact span {
+      font-size: .88rem;
+      color: var(--text-mid);
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      text-decoration: none;
+      transition: color .2s;
+    }
+
+    .hero-contact a:hover { color: var(--blue); }
+
+    .hero-contact svg {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+      opacity: .75;
+    }
+
+    /* ── Tabs ─────────────────────────────────────────────── */
+    .tabs-section {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 clamp(1.5rem, 5vw, 2.5rem) clamp(3rem, 8vw, 6rem);
+    }
+
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 2.5rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-btn {
+      font-family: var(--sans);
+      font-size: .92rem;
+      font-weight: 500;
+      letter-spacing: .02em;
+      color: var(--text-light);
+      background: none;
+      border: none;
+      padding: .85rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+      transition: color .2s, border-color .2s;
+    }
+
+    .tab-btn:hover   { color: var(--text-mid); }
+    .tab-btn.active  { color: var(--text); border-bottom-color: var(--green); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeUp .3s ease; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Section headings ─────────────────────────────────── */
+    .section-label {
+      font-family: var(--sans);
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-light);
+      margin-bottom: 1.2rem;
+      padding-left: 1px;
+    }
+
+    .pub-group { margin-bottom: 2.8rem; }
+    .pub-group:last-child { margin-bottom: 0; }
+
+    /* ── Publication cards ───────────────────────────────── */
+    .pub-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .pub-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1.2rem 1.4rem;
+      transition: box-shadow .2s, border-color .2s;
+      position: relative;
+    }
+
+    .pub-card:hover {
+      box-shadow: var(--shadow);
+      border-color: #D8CFBF;
+    }
+
+    .pub-card + .pub-card { margin-top: .6rem; }
+
+    .pub-number {
+      position: absolute;
+      top: 1.2rem;
+      left: 1.4rem;
+      font-size: .75rem;
+      font-weight: 500;
+      color: var(--text-light);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pub-content { padding-left: 1.6rem; }
+
+    .pub-title {
+      font-family: var(--serif);
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--text);
+      line-height: 1.5;
+      margin-bottom: .35rem;
+    }
+
+    .pub-authors {
+      font-size: .83rem;
+      color: var(--text-mid);
+      margin-bottom: .25rem;
+      line-height: 1.5;
+    }
+
+    .pub-authors strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .pub-meta {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      flex-wrap: wrap;
+    }
+
+    .pub-journal {
+      font-size: .8rem;
+      font-style: italic;
+      color: var(--text-mid);
+    }
+
+    .pub-year {
+      font-size: .75rem;
+      font-weight: 500;
+      color: var(--card);
+      background: var(--green);
+      padding: .15rem .55rem;
+      border-radius: 100px;
+    }
+
+    /* interview link */
+    .interview-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      margin-top: 1rem;
+      font-size: .88rem;
+      color: var(--blue);
+      text-decoration: none;
+      border: 1px solid var(--blue-soft);
+      background: color-mix(in srgb, var(--blue-soft) 40%, var(--card));
+      padding: .5rem 1rem;
+      border-radius: var(--radius-sm);
+      transition: background .2s, border-color .2s;
+    }
+    .interview-link:hover {
+      background: var(--blue-soft);
+      border-color: var(--blue);
+    }
+    .interview-link svg {
+      width: 14px; height: 14px;
+      stroke: currentColor; fill: none;
+      stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    /* ── Opinion article ─────────────────────────────────── */
+    .opinion-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .opinion-header {
+      background: linear-gradient(135deg,
+        color-mix(in srgb, var(--yellow-soft) 60%, var(--bg-alt)),
+        color-mix(in srgb, var(--green-soft) 40%, var(--bg-alt)));
+      padding: 2rem 2.2rem 1.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .opinion-tag {
+      font-size: .7rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--yellow);
+      margin-bottom: .6rem;
+    }
+
+    .opinion-title {
+      font-family: var(--serif);
+      font-size: clamp(1.2rem, 3vw, 1.55rem);
+      font-weight: 500;
+      line-height: 1.35;
+      color: var(--text);
+    }
+
+    .opinion-body {
+      padding: 2rem 2.2rem;
+    }
+
+    .opinion-body p {
+      font-size: .95rem;
+      color: var(--text);
+      margin-bottom: 1.1em;
+      line-height: 1.8;
+    }
+
+    .opinion-body p:last-child { margin-bottom: 0; }
+
+    .opinion-subhead {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--text);
+      margin: 1.6em 0 .5em;
+    }
+
+    /* ── Projects placeholder ─────────────────────────────── */
+    .projects-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 2rem;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      background: color-mix(in srgb, var(--bg-alt) 50%, transparent);
+    }
+
+    .projects-placeholder .icon-wrap {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: var(--blue-soft);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.2rem;
+    }
+
+    .projects-placeholder .icon-wrap svg {
+      width: 26px; height: 26px;
+      stroke: var(--blue); fill: none;
+      stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .projects-placeholder h3 {
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: .5rem;
+    }
+
+    .projects-placeholder p {
+      font-size: .9rem;
+      color: var(--text-mid);
+      max-width: 340px;
+    }
+
+    /* ── Footer ───────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 2rem 1.5rem;
+      font-size: .8rem;
+      color: var(--text-light);
+    }
+
+    /* ── Responsive ───────────────────────────────────────── */
+    @media (max-width: 560px) {
+      .hero {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+      }
+      .hero-pills, .hero-contact { justify-content: center; }
+      .hero-tagline { margin-left: auto; margin-right: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────────────────────── -->
+<nav>
+  <span class="nav-brand">Dr. Pankhuri <span>Saxena</span></span>
+</nav>
+
+<!-- ── Hero ───────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-photo-wrap">
+    <img class="hero-photo" src="psaxena.jpeg" alt="Dr. Pankhuri Saxena" />
+  </div>
+  <div class="hero-text">
+    <h1 class="hero-name">Dr. Pankhuri Saxena</h1>
+    <div class="hero-pills">
+      <span class="pill pill-green">Neuroscientist</span>
+      <span class="pill pill-yellow">Psychologist</span>
+      <span class="pill pill-blue">Science Communicator</span>
+    </div>
+    <p class="hero-tagline">Transforming science into real-world insights — bridging the gap between research and the people it matters to most.</p>
+    <div class="hero-contact">
+      <a href="mailto:pankhuri.saxena1@outlook.com">
+        <!-- mail icon -->
+        <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+        pankhuri.saxena1@outlook.com
+      </a>
+      <span>
+        <!-- location icon -->
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        Germany
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- ── Tabs ────────────────────────────────────────────────── -->
+<section class="tabs-section">
+  <div class="tab-bar" role="tablist">
+    <button class="tab-btn active" role="tab" aria-selected="true"  data-tab="publications">Publications</button>
+    <button class="tab-btn"        role="tab" aria-selected="false" data-tab="opinion">Opinion Pieces</button>
+    <button class="tab-btn"        role="tab" aria-selected="false" data-tab="projects">Projects</button>
+  </div>
+
+  <!-- ── PUBLICATIONS ────────────────────────────────────── -->
+  <div class="tab-panel active" id="tab-publications" role="tabpanel">
+
+    <div class="pub-group">
+      <p class="section-label">Peer-Reviewed Scientific Publications</p>
+      <div class="pub-list">
+
+        <div class="pub-card">
+          <span class="pub-number">1</span>
+          <div class="pub-content">
+            <p class="pub-title">In vivo microdialysis for comparing cortical neurotransmitter concentrations in awake macaques across different cognitive states.</p>
+            <p class="pub-authors">Mayer, S.*, <strong>Saxena, P.*</strong>, Crayen, M.A., Treue, S.</p>
+            <div class="pub-meta">
+              <span class="pub-journal">Journal of Neuroscience Methods</span>
+              <span class="pub-year">2025</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pub-card">
+          <span class="pub-number">2</span>
+          <div class="pub-content">
+            <p class="pub-title">Pathway-selective optogenetics reveals the functional anatomy of top-down attentional modulation in the macaque visual cortex.</p>
+            <p class="pub-authors">Hüer, J., <strong>Saxena, P.</strong>, Treue, S.</p>
+            <div class="pub-meta">
+              <span class="pub-journal">PNAS</span>
+              <span class="pub-year">2024</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pub-card">
+          <span class="pub-number">3</span>
+          <div class="pub-content">
+            <p class="pub-title">Effect of attention on human direction-discrimination thresholds at iso-eccentric locations in the visual field: A registered report protocol.</p>
+            <p class="pub-authors"><strong>Saxena, P.</strong>, Treue, S.</p>
+            <div class="pub-meta">
+              <span class="pub-journal">PLoS ONE</span>
+              <span class="pub-year">2023</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="pub-group">
+      <p class="section-label">Mental Health Policy &amp; Advocacy Publications</p>
+      <div class="pub-list">
+
+        <div class="pub-card">
+          <span class="pub-number">1</span>
+          <div class="pub-content">
+            <p class="pub-title">The mental health crisis among doctoral researchers — findings and best practices.</p>
+            <p class="pub-authors">Kafedijska, I., Heckmann, L., Pires, V., <strong>Saxena, P.</strong>, Lasser, J.</p>
+            <div class="pub-meta">
+              <span class="pub-journal">Zeitschrift für Beratung und Studium</span>
+              <span class="pub-year">2022</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pub-card">
+          <span class="pub-number">2</span>
+          <div class="pub-content">
+            <p class="pub-title">Mental Health in Personal Development – A Perspective from Future Scientist to HR.</p>
+            <p class="pub-authors"><strong>Saxena, P.</strong>, Pires, V.</p>
+            <div class="pub-meta">
+              <span class="pub-journal">Personal in Hochschule und Wissenschaft entwickeln</span>
+              <span class="pub-year">2021</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pub-card">
+          <span class="pub-number">3</span>
+          <div class="pub-content">
+            <p class="pub-title">Being a Doctoral Researcher in the Leibniz Association. 2021 Leibniz PhD Network Survey Report.</p>
+            <p class="pub-authors">Delgado-Osorio, X., Gierke, M., <strong>Saxena, P.</strong></p>
+            <div class="pub-meta">
+              <span class="pub-journal">Leibniz PhD Network</span>
+              <span class="pub-year">2023</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="pub-group">
+      <p class="section-label">Interviews</p>
+      <a class="interview-link" href="https://www.leibniz-magazin.de/alle-artikel/magazindetail/newsdetails/mental-health-a-human-right" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Mental Health: A Human Right — Leibniz Magazin
+      </a>
+    </div>
+
+  </div>
+
+  <!-- ── OPINION PIECES ──────────────────────────────────── -->
+  <div class="tab-panel" id="tab-opinion" role="tabpanel">
+    <div class="opinion-card">
+      <div class="opinion-header">
+        <p class="opinion-tag">Opinion &middot; Healthcare &amp; Innovation</p>
+        <h2 class="opinion-title">Forward Health: A Bold Vision That Arrived Too Early</h2>
+      </div>
+      <div class="opinion-body">
+        <p>In 2016, Forward Health introduced a concept that felt like a glimpse into the future of healthcare. Imagine walking into a sleek, AI-powered Care Pod. No waiting room. No appointment. Within minutes, you could check your vitals, run diagnostics, and get insights into your health. It was efficient, convenient, and promised to shift healthcare from reactive treatment to proactive prevention.</p>
+        <p>The idea was powerful. And it made people pay attention.</p>
+        <p>But in 2024, after 8 years, $650 million in funding, and ambitious plans to deploy thousands of these pods, Forward Health shut down.</p>
+        <p>So what went wrong?</p>
+
+        <p class="opinion-subhead">The Promise of Care Pods</p>
+        <p>At their best, Care Pods offered a compelling solution to a real problem. Healthcare systems around the world are overstretched, and access to primary care can be slow and inefficient. A one-stop diagnostic system could change that.</p>
+        <p>Care Pods had the potential to handle minor ailments, monitor health metrics, and reduce unnecessary clinic visits. In doing so, they could free up time for clinicians to focus on more complex cases — making the entire system more efficient. On paper, it was exactly the kind of innovation healthcare needs.</p>
+
+        <p class="opinion-subhead">Where Reality Fell Short</p>
+        <p>But healthcare isn't just about efficiency. It's about trust. And trust is fragile.</p>
+        <p>Reports began to surface about inaccurate readings, failed procedures, and even safety issues. While these might be expected in early-stage technology, healthcare leaves no room for error. Even small inconsistencies can quickly erode confidence.</p>
+        <p>At the same time, the economics were challenging. Each Care Pod reportedly cost around $1 million to manufacture, excluding maintenance and real estate costs. Combined with a membership-based model, scaling this solution became both expensive and complex.</p>
+        <p>Yet, the biggest challenge wasn't technical or financial. It was human.</p>
+
+        <p class="opinion-subhead">The Missing Piece: Human Connection</p>
+        <p>Healthcare is deeply personal. Patients don't just seek answers — they seek reassurance, empathy, and trust. Care Pods, however, were positioned as a replacement for traditional care, rather than an extension of it. In doing so, they underestimated how much people value human interaction in moments of uncertainty.</p>
+        <p>Technology can enhance care. But it cannot replace the human connection at its core.</p>
+
+        <p class="opinion-subhead">A Lesson in Timing</p>
+        <p>Perhaps Care Pods were not the wrong idea — just the wrong timing. Healthcare systems are inherently conservative, and for good reason. Change is slow because the stakes are high. Adoption requires not just functional technology, but also trust, reliability, and alignment with existing care models.</p>
+        <p>A more balanced approach might have made a difference. Imagine a system where Care Pods complemented clinics rather than competed with them. Where technology was introduced gradually, building confidence over time. Where clinicians and digital tools worked side by side. That kind of hybrid model might have bridged the gap between innovation and acceptance.</p>
+
+        <p class="opinion-subhead">Looking Ahead</p>
+        <p>Forward Health's story is not just about failure. It is about the challenges of transforming a system as complex as healthcare. Innovation alone is not enough.</p>
+        <p>Success in healthcare requires timing, trust, and integration. It requires understanding not just what is possible, but what people are ready to accept. Care Pods may have been ahead of their time. But the need they addressed hasn't gone away.</p>
+        <p>The future of healthcare will likely belong to those who can strike the right balance — combining technology and human care in a way that feels not just efficient, but trustworthy.</p>
+        <p>Because in the end, healthcare is not just about better systems. It's about better care.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PROJECTS ────────────────────────────────────────── -->
+  <div class="tab-panel" id="tab-projects" role="tabpanel">
+    <div class="projects-placeholder">
+      <div class="icon-wrap">
+        <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      </div>
+      <h3>Projects coming soon</h3>
+      <p>Current research and applied projects will be featured here. Check back soon.</p>
+    </div>
+  </div>
+
+</section>
+
+<!-- ── Footer ──────────────────────────────────────────────── -->
+<footer>
+  &copy; 2026 Dr. Pankhuri Saxena &middot; Germany
+</footer>
+
+<script>
+  const btns   = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.tab-panel');
+
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.tab;
+
+      btns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+      panels.forEach(p => p.classList.remove('active'));
+
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      document.getElementById('tab-' + target).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
