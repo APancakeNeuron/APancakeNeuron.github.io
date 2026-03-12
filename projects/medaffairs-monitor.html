@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedAffairs Monitor — Neurology & Psychiatry Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy:   #0d3b66;
+      --teal:   #1a6b8a;
+      --gold:   #c8962a;
+      --light:  #f4f7fb;
+      --text:   #1e2a3a;
+      --muted:  #5a6a7a;
+      --border: #d0dce8;
+      --cream:  #faf9f6;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1.7;
+      color: var(--text);
+      background: var(--cream);
+      padding: 0;
+    }
+
+    /* ── Layout wrapper ── */
+    .wrap { max-width: 760px; margin: 0 auto; padding: 0 24px 64px; }
+
+    /* ── Masthead ── */
+    .masthead {
+      border-bottom: 3px solid var(--navy);
+      padding: 36px 0 18px;
+      margin-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .masthead-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 5px;
+    }
+    .masthead-title {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--navy);
+      line-height: 1.2;
+    }
+    .masthead-right {
+      text-align: right;
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .issue-badge {
+      display: inline-block;
+      background: var(--navy);
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.09em;
+      padding: 3px 9px;
+      border-radius: 3px;
+      margin-bottom: 6px;
+    }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      background: var(--light);
+      border-radius: 8px;
+      padding: 14px 20px;
+      display: flex;
+      gap: 28px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+    }
+    .stat-n {
+      font-family: 'Lora', serif;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--navy);
+      line-height: 1;
+    }
+    .stat-l {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── Section headers ── */
+    h2 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--navy);
+      margin: 36px 0 14px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── Synthesis box ── */
+    .synthesis-box {
+      background: var(--light);
+      border-left: 4px solid var(--teal);
+      border-radius: 0 7px 7px 0;
+      padding: 16px 20px;
+      font-size: 14px;
+      line-height: 1.78;
+      margin-bottom: 10px;
+    }
+
+    /* ── So what box ── */
+    .so-what-box {
+      background: #fff8ec;
+      border-left: 4px solid var(--gold);
+      border-radius: 0 7px 7px 0;
+      padding: 16px 20px;
+      margin-bottom: 36px;
+    }
+    .so-what-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 7px;
+      font-weight: 500;
+    }
+    .so-what-box p { font-size: 14px; line-height: 1.78; }
+
+    /* ── Article cards ── */
+    .category-group { margin-bottom: 28px; }
+    .category-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-bottom: 5px;
+      margin-bottom: 12px;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .article-card {
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 15px 17px;
+      margin-bottom: 12px;
+      background: #fff;
+      transition: box-shadow 0.2s;
+    }
+    .article-card:hover { box-shadow: 0 2px 10px rgba(13,59,102,0.07); }
+
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+      flex-wrap: wrap;
+    }
+    .cat-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: var(--navy);
+      color: #fff;
+    }
+    .cat-badge.news        { background: #2d7a4f; }
+    .cat-badge.hta         { background: #2d4f7a; }
+    .cat-badge.regulatory  { background: #7a2d5a; }
+    .cat-badge.pharma      { background: #7a5a2d; }
+
+    .art-source {
+      font-size: 11.5px;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .art-date {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      margin-left: auto;
+    }
+    .art-headline {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 14.5px;
+      font-weight: 500;
+      color: var(--navy);
+      margin-bottom: 5px;
+      line-height: 1.45;
+    }
+    .art-headline a { color: inherit; text-decoration: none; }
+    .art-headline a:hover { text-decoration: underline; color: var(--teal); }
+    .art-summary  { font-size: 13px; color: var(--text); line-height: 1.65; margin-bottom: 7px; }
+    .art-relevance { font-size: 12px; color: var(--teal); font-style: italic; margin-bottom: 8px; }
+    .art-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+    .tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5px;
+      background: var(--light);
+      color: var(--teal);
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    /* ── Q&A section ── */
+    .qa-section {
+      background: var(--navy);
+      border-radius: 10px;
+      padding: 24px;
+      margin-top: 40px;
+      color: #fff;
+    }
+    .qa-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 6px;
+    }
+    .qa-title {
+      font-family: 'Lora', serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .qa-desc {
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 18px;
+      line-height: 1.65;
+    }
+    .qa-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+    .qa-input {
+      background: rgba(255,255,255,0.09);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 5px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 13.5px;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .qa-input::placeholder { color: rgba(255,255,255,0.3); }
+    .qa-input:focus { border-color: rgba(255,255,255,0.5); }
+    .qa-email  { width: 210px; }
+    .qa-question { flex: 1; min-width: 180px; }
+    .qa-btn {
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 13.5px;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .qa-btn:hover    { background: #0e8a9f; }
+    .qa-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    #qa-answer {
+      margin-top: 14px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.07);
+      border-left: 3px solid var(--teal);
+      border-radius: 0 5px 5px 0;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.85);
+      display: none;
+    }
+    .qa-note {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      margin-top: 12px;
+    }
+
+    /* ── Loading / error states ── */
+    .loading-state {
+      text-align: center;
+      padding: 60px 0;
+      color: var(--muted);
+    }
+    .spinner {
+      width: 28px; height: 28px;
+      border: 3px solid var(--border);
+      border-top-color: var(--teal);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-state p { font-style: italic; font-size: 13px; }
+
+    .error-state {
+      text-align: center;
+      padding: 50px 0;
+      color: var(--muted);
+    }
+    .error-state .icon { font-size: 36px; margin-bottom: 12px; }
+    .error-state p { font-size: 13.5px; line-height: 1.7; }
+
+    /* ── Footer ── */
+    .report-footer {
+      margin-top: 48px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 11.5px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* ── Back link (when used standalone) ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      color: var(--teal);
+      text-decoration: none;
+      padding: 20px 0 0;
+      font-family: 'Inter', sans-serif;
+    }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  
+
+  <!-- Report is rendered here by JS -->
+  <div id="report-container">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading this week's report…</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// =====================================================================
+// ⚙️  CONFIGURATION — paste your Cloudflare Worker URL here
+// =====================================================================
+const WORKER_URL = "https://medaffairs-monitor.pankhuris.workers.dev";
+// =====================================================================
+
+// Category → CSS class mapping
+function catClass(cat) {
+  if (["Regulatory"].includes(cat))   return "regulatory";
+  if (["HTA"].includes(cat))          return "hta";
+  if (["Medical News", "Neurology", "Psychiatry"].includes(cat)) return "news";
+  if (["Pharma Industry"].includes(cat)) return "pharma";
+  return "";
+}
+
+// Group articles by category preserving priority order
+const CAT_ORDER = ["Regulatory", "HTA", "Peer-Reviewed", "Scientific Literature",
+                   "Neurology", "Psychiatry", "Medical News", "Pharma Industry"];
+
+function groupByCategory(articles) {
+  const groups = {};
+  for (const art of articles) {
+    const cat = art.category || "Other";
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(art);
+  }
+  return Object.entries(groups).sort(([a], [b]) => {
+    const ia = CAT_ORDER.indexOf(a);
+    const ib = CAT_ORDER.indexOf(b);
+    return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+  });
+}
+
+function renderArticleCard(art) {
+  const tags = (art.tags || []).map(t => `<span class="tag">${t}</span>`).join("");
+  return `
+    <div class="article-card">
+      <div class="article-meta">
+        <span class="cat-badge ${catClass(art.category)}">${art.category}</span>
+        <span class="art-source">${art.journal || ""}</span>
+        ${art.pub_date ? `<span class="art-date">${art.pub_date}</span>` : ""}
+      </div>
+      <div class="art-headline">
+        <a href="${art.url}" target="_blank" rel="noopener">${art.headline || art.title || ""}</a>
+      </div>
+      ${art.summary   ? `<div class="art-summary">${art.summary}</div>` : ""}
+      ${art.relevance ? `<div class="art-relevance">🔍 ${art.relevance}</div>` : ""}
+      ${tags          ? `<div class="art-tags">${tags}</div>` : ""}
+    </div>`;
+}
+
+function renderReport(report) {
+  const groups = groupByCategory(report.articles || []);
+
+  const articlesHtml = groups.map(([cat, arts]) => `
+    <div class="category-group">
+      <div class="category-label">${cat}</div>
+      ${arts.map(renderArticleCard).join("")}
+    </div>`).join("");
+
+  const genDate = report.generatedAt
+    ? new Date(report.generatedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+    : "";
+
+  return `
+    <!-- MASTHEAD -->
+    <div class="masthead">
+      <div>
+        <div class="masthead-eyebrow">Medical Affairs Intelligence</div>
+        <div class="masthead-title">MedAffairs Monitor</div>
+      </div>
+      <div class="masthead-right">
+        <div class="issue-badge">ISSUE ${report.issueNumber || "—"}</div><br>
+        Week of ${report.weekLabel || ""}<br>
+        Neurology · Psychiatry · CNS
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-bar">
+      <div><div class="stat-n">${report.stats?.total || 0}</div><div class="stat-l">Articles reviewed</div></div>
+      <div><div class="stat-n">${report.stats?.peerReviewed || 0}</div><div class="stat-l">Peer-reviewed</div></div>
+      <div><div class="stat-n">${report.stats?.regulatory || 0}</div><div class="stat-l">Regulatory / HTA</div></div>
+      <div><div class="stat-n">${report.stats?.news || 0}</div><div class="stat-l">Industry news</div></div>
+    </div>
+
+    <!-- SYNTHESIS -->
+    <h2>📊 Weekly Synthesis</h2>
+    <div class="synthesis-box">${report.synthesis || ""}</div>
+
+    <!-- SO WHAT -->
+    <div class="so-what-box">
+      <div class="so-what-label">⚡ So What? Strategic Implications</div>
+      <p>${report.soWhat || ""}</p>
+    </div>
+
+    <!-- ARTICLES -->
+    <h2>📄 This Week's Key Publications</h2>
+    ${articlesHtml}
+
+    <!-- Q&A -->
+    <div class="qa-section">
+      <div class="qa-eyebrow">Premium feature</div>
+      <div class="qa-title">Ask about this week's report</div>
+      <p class="qa-desc">Authorised users can ask questions about the articles and receive AI-powered answers.</p>
+      <div class="qa-row">
+        <input id="qa-email" class="qa-input qa-email" type="email" placeholder="your@email.com">
+      </div>
+      <div class="qa-row">
+        <input id="qa-question" class="qa-input qa-question" type="text" placeholder="e.g. What were the key EMA decisions this week?">
+        <button class="qa-btn" id="qa-submit" onclick="askQuestion()">Ask →</button>
+      </div>
+      <div id="qa-answer"></div>
+      <div class="qa-note">Premium access only · Contact us to request access</div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="report-footer">
+      <span>Generated ${genDate} · Powered by Claude AI</span>
+      <span>MedAffairs Monitor — Neurology &amp; Psychiatry</span>
+    </div>`;
+}
+
+// Load report from Worker
+async function loadReport() {
+  const container = document.getElementById("report-container");
+  try {
+    const resp = await fetch(`${WORKER_URL}/api/report`);
+    if (!resp.ok) {
+      const data = await resp.json();
+      container.innerHTML = `
+        <div class="error-state">
+          <div class="icon">📭</div>
+          <p>${data.error || "No report available yet."}<br>
+          The first report will be generated on the next scheduled Friday run.</p>
+        </div>`;
+      return;
+    }
+    const report = await resp.json();
+    container.innerHTML = renderReport(report);
+  } catch (e) {
+    container.innerHTML = `
+      <div class="error-state">
+        <div class="icon">⚠️</div>
+        <p>Could not load the report. Please check your connection and try again.</p>
+      </div>`;
+  }
+}
+
+// Q&A
+async function askQuestion() {
+  const email    = document.getElementById("qa-email").value.trim();
+  const question = document.getElementById("qa-question").value.trim();
+  const answerEl = document.getElementById("qa-answer");
+  const btn      = document.getElementById("qa-submit");
+
+  if (!email || !question) {
+    answerEl.style.display = "block";
+    answerEl.textContent   = "Please enter your email and a question.";
+    return;
+  }
+
+  btn.disabled          = true;
+  answerEl.style.display = "block";
+  answerEl.textContent   = "Thinking…";
+
+  try {
+    const resp = await fetch(`${WORKER_URL}/api/ask`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ email, question }),
+    });
+    const data = await resp.json();
+    answerEl.textContent = data.ok ? data.answer : `⚠️ ${data.error || "Unable to answer."}`;
+  } catch {
+    answerEl.textContent = "⚠️ Request failed. Please try again.";
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && document.activeElement?.id === "qa-question") askQuestion();
+});
+
+loadReport();
+</script>
+</body>
+</html>

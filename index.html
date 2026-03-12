@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dr. Pankhuri Saxena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- Opinion pieces data — add new articles in opinion-pieces/data.js -->
+  <script src="opinion-pieces/data.js"></script>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────────────────────────────────────── -->
+<nav>
+  <span class="nav-brand">Dr. Pankhuri <span>Saxena</span></span>
+</nav>
+
+<!-- ── Hero ───────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div>
+    <img class="hero-photo" src="psaxena.jpeg" alt="Dr. Pankhuri Saxena" />
+  </div>
+  <div class="hero-text">
+    <h1 class="hero-name">Dr. Pankhuri Saxena</h1>
+    <div class="hero-pills">
+      <span class="pill pill-green">Neuroscientist</span>
+      <span class="pill pill-yellow">Psychologist</span>
+      <span class="pill pill-blue">Scientific Advisor</span>
+    </div>
+    <p class="hero-tagline">Transforming science into real-world insights — bridging the gap between research and the people it matters to most.</p>
+  </div>
+</section>
+
+<!-- ── Tabs ────────────────────────────────────────────────────────────────── -->
+<section class="tabs-section">
+  <div class="tab-bar" role="tablist">
+    <button class="tab-btn active" role="tab" aria-selected="true"  data-tab="publications">Publications</button>
+    <button class="tab-btn"        role="tab" aria-selected="false" data-tab="opinion">Opinion Pieces</button>
+    <button class="tab-btn"        role="tab" aria-selected="false" data-tab="projects">Projects</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       PUBLICATIONS
+       To add a new publication: copy a <div class="pub-card"> block below
+       and paste it at the top of the relevant .pub-list.
+  ════════════════════════════════════════════════════════════════════════ -->
+  <div class="tab-panel active" id="tab-publications" role="tabpanel">
+
+    <div class="pub-group">
+      <p class="section-label">Peer-Reviewed Scientific Publications</p>
+      <div class="pub-list">
+
+        <div class="pub-card">
+          <span class="pub-number">1</span>
+          <div class="pub-content">
+            <p class="pub-title">In vivo microdialysis for comparing cortical neurotransmitter concentrations in awake macaques across different cognitive states.</p>
+            <p class="pub-authors">Mayer, S.*, <strong>Saxena, P.*</strong>, Crayen, M.A., Treue, S.</p>
+            <div class="pub-meta">
+              <span class="pub-journal">Journal of Neuroscience Methods</span>
+              <span class="pub-year">2025</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pub-card">
+          <span class="pub-number">2</span>
+          <div class="pub-content">
+            <p class="pub-title">Pathway-selective optogenetics reveals the functional anatomy of top-down attentional modulation in the macaque visual cortex.</p>
+            <p class="pub-authors">Hüer, J., <strong>Saxena, P.</strong>, Treue, S.</p>
+            <div class="pub-meta">
+              <span class="pub-journal">PNAS</span>
+              <span class="pub-year">2024</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pub-card">
+          <span class="pub-number">3</span>
+          <div class="pub-content">
+            <p class="pub-title">Effect of attention on human direction-discrimination thresholds at iso-eccentric locations in the visual field: A registered report protocol.</p>
+            <p class="pub-authors"><strong>Saxena, P.</strong>, Treue, S.</p>
+            <div class="pub-meta">
+              <span class="pub-journal">PLoS ONE</span>
+              <span class="pub-year">2023</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="pub-group">
+      <p class="section-label">Mental Health Policy &amp; Advocacy Publications</p>
+      <div class="pub-list">
+
+        <div class="pub-card">
+          <span class="pub-number">1</span>
+          <div class="pub-content">
+            <p class="pub-title">The mental health crisis among doctoral researchers — findings and best practices.</p>
+            <p class="pub-authors">Kafedijska, I., Heckmann, L., Pires, V., <strong>Saxena, P.</strong>, Lasser, J.</p>
+            <div class="pub-meta">
+              <span class="pub-journal">Zeitschrift für Beratung und Studium</span>
+              <span class="pub-year">2022</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pub-card">
+          <span class="pub-number">2</span>
+          <div class="pub-content">
+            <p class="pub-title">Mental Health in Personal Development – A Perspective from Future Scientist to HR.</p>
+            <p class="pub-authors"><strong>Saxena, P.</strong>, Pires, V.</p>
+            <div class="pub-meta">
+              <span class="pub-journal">Personal in Hochschule und Wissenschaft entwickeln</span>
+              <span class="pub-year">2021</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pub-card">
+          <span class="pub-number">3</span>
+          <div class="pub-content">
+            <p class="pub-title">Being a Doctoral Researcher in the Leibniz Association. 2021 Leibniz PhD Network Survey Report.</p>
+            <p class="pub-authors">Delgado-Osorio, X., Gierke, M., <strong>Saxena, P.</strong></p>
+            <div class="pub-meta">
+              <span class="pub-journal">Leibniz PhD Network</span>
+              <span class="pub-year">2023</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="pub-group">
+      <p class="section-label">Interviews</p>
+      <a class="interview-link" href="https://www.leibniz-magazin.de/alle-artikel/magazindetail/newsdetails/mental-health-a-human-right" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Mental Health: A Human Right — Leibniz Magazin
+      </a>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       OPINION PIECES
+       Articles are loaded from opinion-pieces/data.js — edit that file
+       to add, edit, or remove pieces. No changes needed here.
+  ════════════════════════════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-opinion" role="tabpanel">
+    <div class="opinion-list" id="opinion-list">
+      <!-- populated by js/main.js from opinion-pieces/data.js -->
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       PROJECTS
+       Each project is a .project-card block. The mealplanner is embedded
+       via iframe pointing to projects/mealplanner.html.
+       Set the Cloudflare Worker URL inside that file when ready.
+  ════════════════════════════════════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-projects" role="tabpanel">
+
+    <div class="project-card">
+      <div class="project-info">
+        <div>
+          <span class="pill pill-blue" style="font-size:.7rem;margin-bottom:.5rem;display:inline-block">Tool · Medical Affairs</span>
+          <h3 class="project-name">🧠 MedAffairs Monitor</h3>
+          <p class="project-desc">A weekly AI-powered literature briefing for medical affairs professionals in neurology and psychiatry. Scans regulatory decisions, HTA outcomes, peer-reviewed journals, and industry news — synthesised into a two-page report with strategic implications.</p>
+        </div>
+      </div>
+      <div class="project-frame-wrap">
+        <iframe
+          src="projects/medaffairs-monitor.html"
+          title="MedAffairs Monitor"
+          sandbox="allow-scripts allow-same-origin allow-forms"
+          loading="lazy"
+        ></iframe>
+      </div>
+    </div>
+
+     <div class="project-card">
+      <div class="project-info">
+        <div>
+          <span class="pill pill-green" style="font-size:.7rem;margin-bottom:.5rem;display:inline-block">App · Nutrition</span>
+          <h3 class="project-name">🌿 What shall we cook today?</h3>
+          <p class="project-desc">A daily meal planning companion that suggests healthy, high-fibre, plant-protein-rich meals based on the season, current weather, and personal recipes. Includes a custom recipe builder and kitchen conversion tools.</p>
+        </div>
+      </div>
+      <div class="project-frame-wrap">
+        <iframe
+          src="projects/mealplanner.html"
+          title="Meal Planner App"
+          sandbox="allow-scripts allow-same-origin allow-forms"
+          loading="lazy"
+        ></iframe>
+      </div>
+    </div>
+
+  </div>
+
+   
+
+    
+
+</section>
+
+<!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+<footer>
+  &copy; 2026 Dr. Pankhuri Saxena &middot; Germany
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

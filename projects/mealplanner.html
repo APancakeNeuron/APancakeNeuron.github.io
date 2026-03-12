@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌿 What shall we cook today?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f1f8e9; font-family: 'Lora', Georgia, serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // =====================================================================
+    // ⚙️  CONFIGURATION — paste your Cloudflare Worker URL here
+    // =====================================================================
+    const PROXY_URL = "https://mealplannerapp.pankhuris.workers.dev";
+    // =====================================================================
+
+    const PASSWORD = "beninnihome27";
+    const PROTECTED_TABS = ["custom", "myrecipes", "favorites"];
+
+    const { useState, useEffect } = React;
+
+    const FRANKFURT_LAT = 50.1109;
+    const FRANKFURT_LON = 8.6821;
+
+    function getSeason() {
+      const m = new Date().getMonth() + 1;
+      if (m >= 3 && m <= 5) return "Spring";
+      if (m >= 6 && m <= 8) return "Summer";
+      if (m >= 9 && m <= 11) return "Autumn";
+      return "Winter";
+    }
+
+    const seasonalVeggies = {
+      Spring: ["asparagus", "peas", "palak (spinach)", "mooli (radish)", "hara pyaz / Frühlingszwiebeln (spring onions)", "methi (fenugreek leaves)", "Lauch (leek)"],
+      Summer: ["tori (zucchini)", "tamatar (tomatoes)", "baingan (aubergine)", "shimla mirch / Paprika (peppers)", "karela (bitter gourd)", "bhindi (okra)", "Frühlingszwiebeln (green onions)"],
+      Autumn: ["kaddu / Kürbis (pumpkin)", "butternut squash", "mushrooms", "arbi (taro root)", "hara moong (green mung beans)", "Lauch (leek)", "Paprika (peppers)"],
+      Winter: ["gajar (carrots)", "gobhi (cauliflower)", "matar (green peas)", "sarson (mustard greens)", "shakarkandi (sweet potato)", "chukander (beetroot)", "saag (mustard leaf)", "Kürbis (pumpkin)", "Lauch (leek)"],
+    };
+
+    const moodColors = {
+      "Cosy & warming":      { bg: "#fff3e0", text: "#e65100", border: "#ffb74d" },
+      "Light & fresh":       { bg: "#e8f5e9", text: "#2e7d32", border: "#81c784" },
+      "Bold & spicy":        { bg: "#fce4ec", text: "#c62828", border: "#ef9a9a" },
+      "Classic comfort":     { bg: "#fffde7", text: "#f57f17", border: "#fff176" },
+      "Hearty & nourishing": { bg: "#e8f5e9", text: "#1b5e20", border: "#66bb6a" },
+      default:               { bg: "#f1f8e9", text: "#558b2f", border: "#aed581" },
+    };
+
+    const CUISINES = ["German / European", "Italian", "Mediterranean", "Indian"];
+    const PRODUCE  = ["🥦","🍅","🥕","🫑","🥬","🍋","🍊","🌽","🥑","🫒","🍇","🍓","🥝","🧅","🫚","🌶️","🥒","🍆","🧄","🥗"];
+
+    const CUP_INGREDIENTS = [
+      { name: "All-purpose flour",      perCup: 125 },
+      { name: "Whole wheat flour",      perCup: 120 },
+      { name: "Sugar (white)",          perCup: 200 },
+      { name: "Brown sugar (packed)",   perCup: 220 },
+      { name: "Icing / powdered sugar", perCup: 120 },
+      { name: "Butter",                 perCup: 227 },
+      { name: "Rolled oats",            perCup: 90  },
+      { name: "Rice (uncooked)",        perCup: 185 },
+      { name: "Lentils (dry)",          perCup: 192 },
+      { name: "Chickpeas (dry)",        perCup: 200 },
+      { name: "Honey / maple syrup",    perCup: 340 },
+      { name: "Milk",                   perCup: 240 },
+      { name: "Water",                  perCup: 240 },
+      { name: "Cocoa powder",           perCup: 85  },
+      { name: "Almond flour",           perCup: 96  },
+      { name: "Breadcrumbs (dry)",      perCup: 108 },
+    ];
+
+    const TEMP_PRESETS = [
+      { label: "Very low oven",  f: 250, c: 120 },
+      { label: "Low oven",       f: 300, c: 150 },
+      { label: "Moderate oven",  f: 350, c: 175 },
+      { label: "Hot oven",       f: 400, c: 200 },
+      { label: "Very hot oven",  f: 450, c: 230 },
+      { label: "Boiling water",  f: 212, c: 100 },
+      { label: "Simmering",      f: 185, c: 85  },
+      { label: "Frying oil",     f: 350, c: 175 },
+      { label: "Deep frying",    f: 375, c: 190 },
+    ];
+
+    const INCH_PRESETS = [
+      { label: '6" round tin',      a: '6"',    b: '15 cm'    },
+      { label: '8" round tin',      a: '8"',    b: '20 cm'    },
+      { label: '9" round tin',      a: '9"',    b: '23 cm'    },
+      { label: '10" round tin',     a: '10"',   b: '25 cm'    },
+      { label: '8×8" square tin',   a: '8×8"',  b: '20×20 cm' },
+      { label: '9×13" baking dish', a: '9×13"', b: '23×33 cm' },
+      { label: 'Loaf tin (small)',  a: '8×4"',  b: '20×10 cm' },
+      { label: 'Loaf tin (large)',  a: '9×5"',  b: '23×13 cm' },
+      { label: '1 inch',            a: '1"',    b: '2.5 cm'   },
+      { label: '6 inches',          a: '6"',    b: '15.2 cm'  },
+      { label: '1 foot',            a: '12"',   b: '30.5 cm'  },
+    ];
+
+    // Cloud storage via Cloudflare Worker KV (syncs across all devices)
+    // Falls back to localStorage if the worker is unavailable
+    const storage = {
+      get: async (key) => {
+        try {
+          const res = await fetch(`${PROXY_URL}/api/data?key=${key}`);
+          const data = await res.json();
+          if (data.value !== null && data.value !== undefined) return { value: data.value };
+          // fallback to localStorage
+          const v = localStorage.getItem(key);
+          return v ? { value: v } : null;
+        } catch(e) {
+          const v = localStorage.getItem(key);
+          return v ? { value: v } : null;
+        }
+      },
+      set: async (key, val) => {
+        try {
+          await fetch(`${PROXY_URL}/api/data`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key, value: val }),
+          });
+          localStorage.setItem(key, val); // also keep local copy
+        } catch(e) {
+          localStorage.setItem(key, val);
+        }
+      },
+    };
+
+    function ProduceCollage() {
+      const items = [];
+      for (let i = 0; i < 28; i++) {
+        const emoji   = PRODUCE[i % PRODUCE.length];
+        const top     = Math.sin(i * 2.3) * 38 + 42;
+        const left    = (i / 28) * 110 - 5;
+        const rot     = Math.sin(i * 1.7) * 25;
+        const size    = 18 + (i % 3) * 6;
+        const opacity = 0.18 + (i % 4) * 0.07;
+        items.push(
+          <span key={i} style={{ position:"absolute", top:`${top}%`, left:`${left}%`, fontSize:size, transform:`rotate(${rot}deg)`, opacity, pointerEvents:"none", userSelect:"none" }}>
+            {emoji}
+          </span>
+        );
+      }
+      return <div style={{ position:"absolute", inset:0, overflow:"hidden" }}>{items}</div>;
+    }
+
+    function ConversionsTab({ C, inp }) {
+      const [cupsVal,  setCupsVal]  = useState("");
+      const [cupsIngr, setCupsIngr] = useState(0);
+      const [tempVal,  setTempVal]  = useState("");
+      const [tempDir,  setTempDir]  = useState("ftoc");
+      const [inchVal,  setInchVal]  = useState("");
+
+      const cupsGrams  = () => { const v = parseFloat(cupsVal); if (isNaN(v) || v <= 0) return null; return Math.round(v * CUP_INGREDIENTS[cupsIngr].perCup); };
+      const tempResult = () => { const v = parseFloat(tempVal); if (isNaN(v)) return null; return tempDir === "ftoc" ? ((v-32)*5/9).toFixed(1) : (v*9/5+32).toFixed(1); };
+      const inchResult = () => { const v = parseFloat(inchVal); if (isNaN(v) || v < 0) return null; return (v * 2.54).toFixed(1); };
+
+      const gridStyle = { display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))", gap:6, marginTop:4 };
+      const rowStyle  = (border) => ({ background:"rgba(255,255,255,0.75)", borderRadius:6, padding:"6px 10px", fontFamily:"'DM Sans',sans-serif", fontSize:12, display:"flex", justifyContent:"space-between", border:`1px solid ${border}` });
+
+      return (
+        <div className="fi">
+          <h2 style={{ margin:"0 0 4px", fontSize:21, fontWeight:700 }}>📏 Kitchen Conversions</h2>
+          <p style={{ margin:"0 0 22px", fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.textLight }}>Quick reference for everyday cooking measurements.</p>
+
+          <div className="card" style={{ background:"#e8f5e9", border:"1.5px solid #a5d6a7" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16 }}>
+              <span style={{ fontSize:24 }}>🥛</span>
+              <div><div style={{ fontWeight:700, fontSize:17 }}>Cups → Grams</div>
+              <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textMid }}>Common baking & cooking ingredients</div></div>
+            </div>
+            <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:12 }}>
+              <select style={{...inp, flex:2, minWidth:160, background:"#fff"}} value={cupsIngr} onChange={e=>setCupsIngr(Number(e.target.value))}>
+                {CUP_INGREDIENTS.map((ing,i)=><option key={i} value={i}>{ing.name}</option>)}
+              </select>
+              <input style={{...inp, flex:1, minWidth:80, background:"#fff"}} type="number" min="0" step="0.25" placeholder="Cups" value={cupsVal} onChange={e=>setCupsVal(e.target.value)} />
+            </div>
+            {cupsGrams() !== null && (
+              <div style={{ background:"#fff", borderRadius:8, padding:"10px 16px", border:"1px solid #a5d6a7", fontFamily:"'DM Sans',sans-serif", fontSize:15, marginBottom:14 }}>
+                <strong>{cupsVal} cup{parseFloat(cupsVal)!==1?"s":""}</strong> of <strong>{CUP_INGREDIENTS[cupsIngr].name}</strong> = <strong style={{ color:C.green, fontSize:18 }}>{cupsGrams()} g</strong>
+              </div>
+            )}
+            <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, fontWeight:600, color:C.textMid, marginBottom:6, textTransform:"uppercase", letterSpacing:"0.1em" }}>Quick reference — 1 cup =</div>
+            <div style={gridStyle}>
+              {CUP_INGREDIENTS.map((ing,i)=>(
+                <div key={i} style={{...rowStyle("#c8e6c9"), cursor:"pointer"}} onClick={()=>setCupsIngr(i)}>
+                  <span style={{ color:C.textDark }}>{ing.name}</span>
+                  <span style={{ fontWeight:600, color:C.green }}>{ing.perCup}g</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="card" style={{ background:"#fff3e0", border:"1.5px solid #ffb74d" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16 }}>
+              <span style={{ fontSize:24 }}>🌡️</span>
+              <div><div style={{ fontWeight:700, fontSize:17 }}>°F ↔ °C</div>
+              <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textMid }}>Oven & cooking temperatures</div></div>
+            </div>
+            <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:12 }}>
+              <select style={{...inp, flex:2, minWidth:140, background:"#fff"}} value={tempDir} onChange={e=>setTempDir(e.target.value)}>
+                <option value="ftoc">°F → °C</option>
+                <option value="ctof">°C → °F</option>
+              </select>
+              <input style={{...inp, flex:1, minWidth:80, background:"#fff"}} type="number" placeholder={tempDir==="ftoc"?"°F":"°C"} value={tempVal} onChange={e=>setTempVal(e.target.value)} />
+            </div>
+            {tempResult() !== null && (
+              <div style={{ background:"#fff", borderRadius:8, padding:"10px 16px", border:"1px solid #ffb74d", fontFamily:"'DM Sans',sans-serif", fontSize:15, marginBottom:14 }}>
+                <strong>{tempVal}{tempDir==="ftoc"?"°F":"°C"}</strong> = <strong style={{ color:"#e65100", fontSize:18 }}>{tempResult()}{tempDir==="ftoc"?"°C":"°F"}</strong>
+              </div>
+            )}
+            <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, fontWeight:600, color:C.textMid, marginBottom:6, textTransform:"uppercase", letterSpacing:"0.1em" }}>Common oven temperatures</div>
+            <div style={gridStyle}>
+              {TEMP_PRESETS.map((p,i)=>(
+                <div key={i} style={{...rowStyle("#ffcc80"), cursor:"pointer"}} onClick={()=>{ setTempVal(p.f); setTempDir("ftoc"); }}>
+                  <span style={{ color:C.textDark }}>{p.label}</span>
+                  <span style={{ fontWeight:600, color:"#e65100" }}>{p.f}°F / {p.c}°C</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="card" style={{ background:"#f3e5f5", border:"1.5px solid #ce93d8" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16 }}>
+              <span style={{ fontSize:24 }}>📐</span>
+              <div><div style={{ fontWeight:700, fontSize:17 }}>Inches → cm</div>
+              <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textMid }}>Baking tin & pan sizes</div></div>
+            </div>
+            <div style={{ display:"flex", gap:10, flexWrap:"wrap", marginBottom:12 }}>
+              <input style={{...inp, flex:1, minWidth:100, background:"#fff"}} type="number" min="0" step="0.5" placeholder="Inches" value={inchVal} onChange={e=>setInchVal(e.target.value)} />
+            </div>
+            {inchResult() !== null && (
+              <div style={{ background:"#fff", borderRadius:8, padding:"10px 16px", border:"1px solid #ce93d8", fontFamily:"'DM Sans',sans-serif", fontSize:15, marginBottom:14 }}>
+                <strong>{inchVal}"</strong> = <strong style={{ color:"#7b1fa2", fontSize:18 }}>{inchResult()} cm</strong>
+              </div>
+            )}
+            <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, fontWeight:600, color:C.textMid, marginBottom:6, textTransform:"uppercase", letterSpacing:"0.1em" }}>Common tin & pan sizes</div>
+            <div style={gridStyle}>
+              {INCH_PRESETS.map((p,i)=>(
+                <div key={i} style={rowStyle("#ce93d8")}>
+                  <span style={{ color:C.textDark }}>{p.label}</span>
+                  <span style={{ fontWeight:600, color:"#7b1fa2" }}>{p.a} = {p.b}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function MealPlanner() {
+      const [unlocked,       setUnlocked]       = useState(false);
+      const [pwInput,        setPwInput]        = useState("");
+      const [pwError,        setPwError]        = useState(false);
+      const [weather,        setWeather]        = useState(null);
+      const [meals,          setMeals]          = useState(null);
+      const [loading,        setLoading]        = useState(false);
+      const [favorites,      setFavorites]      = useState([]);
+      const [myRecipes,      setMyRecipes]      = useState([]);
+      const [activeTab,      setActiveTab]      = useState("today");
+      const [expandedRecipe, setExpandedRecipe] = useState(null);
+      const [loadingRecipe,  setLoadingRecipe]  = useState(null);
+      const [recipeDetails,  setRecipeDetails]  = useState({});
+      const [showAddForm,    setShowAddForm]    = useState(false);
+      const [newRecipe,      setNewRecipe]      = useState({ name:"", description:"", cuisine:"", meal_type:"either" });
+      const [suggestionMode, setSuggestionMode] = useState(null);
+      const [customPrompt,   setCustomPrompt]   = useState("");
+      const [customResult,   setCustomResult]   = useState(null);
+      const [loadingCustom,  setLoadingCustom]  = useState(false);
+
+      const season  = getSeason();
+      const veggies = seasonalVeggies[season];
+
+      // Load saved data from cloud KV storage
+      useEffect(() => {
+        (async () => {
+          try { const favs = await storage.get("meal-favorites"); if (favs) setFavorites(JSON.parse(favs.value)); } catch(e) {}
+          try { const recs = await storage.get("my-recipes");    if (recs) setMyRecipes(JSON.parse(recs.value));  } catch(e) {}
+        })();
+      }, []);
+
+      // Fetch Frankfurt weather
+      useEffect(() => {
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${FRANKFURT_LAT}&longitude=${FRANKFURT_LON}&current_weather=true`)
+          .then(r => r.json())
+          .then(data => {
+            const code = data.current_weather.weathercode;
+            const temp = data.current_weather.temperature;
+            const desc = code<=1?"sunny":code<=3?"partly cloudy":code<=67?"rainy":"snowy";
+            setWeather({ temp, desc, code });
+          })
+          .catch(() => setWeather({ temp:null, desc:"unknown", code:0 }));
+      }, []);
+
+      const healthNote = "IMPORTANT: Prioritise recipes that are healthy, hearty, HIGH IN FIBRE (legumes, whole grains, vegetables, seeds, nuts) AND HIGH IN PLANT-BASED PROTEIN (lentils, chickpeas, beans, tofu, tempeh, edamame, quinoa, hemp seeds, nutritional yeast). Mention both fibre-rich and protein-rich ingredients prominently.";
+
+      const callAPI = async (prompt, maxTokens = 1000) => {
+        if (PROXY_URL === "https://YOUR-WORKER-NAME.YOUR-SUBDOMAIN.workers.dev") {
+          throw new Error("Please set your Cloudflare Worker URL in the PROXY_URL variable at the top of mealplanner.html");
+        }
+        const res = await fetch(`${PROXY_URL}/api/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: maxTokens, messages: [{ role: "user", content: prompt }] }),
+        });
+        const data = await res.json();
+        if (!data.content || data.error) throw new Error(data.error?.message || `HTTP ${res.status}`);
+        return data.content[0].text;
+      };
+
+      const generateMeals = async (forcedMode = null) => {
+        setLoading(true); setMeals(null); setRecipeDetails({}); setExpandedRecipe(null);
+        const mode = forcedMode || (myRecipes.length > 0 && Math.random() < 0.4 ? "mine" : "ai");
+        setSuggestionMode(mode);
+
+        const today  = new Date().toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long" });
+        const wx     = weather ? `Weather in Frankfurt: ${weather.desc}${weather.temp !== null ? `, ${weather.temp}°C` : ""}.` : "";
+        const wxHint = weather && (weather.code >= 50 || (weather.temp !== null && weather.temp < 10)) ? "Lean towards warming, comforting dishes." : weather && weather.temp !== null && weather.temp > 20 ? "Lean towards lighter, fresher dishes." : "";
+        const jsonShape = `{"lunch":{"name":"...","cuisine":"...","description":"...","ingredients":["...","...","..."],"mood":"...","emoji":"...","fibre_highlight":"...","protein_highlight":"...","isOwn":false},"dinner":{"name":"...","cuisine":"...","description":"...","ingredients":["...","...","..."],"mood":"...","emoji":"...","fibre_highlight":"...","protein_highlight":"...","isOwn":false}}`;
+
+        let prompt = "";
+        if (mode === "mine" && myRecipes.length >= 2) {
+          const [A, B] = [...myRecipes].sort(() => Math.random() - 0.5);
+          prompt = `Present these two home recipes warmly. Give each a mood tag, emoji, fibre_highlight and protein_highlight. ${healthNote}\nLunch: "${A.name}" — ${A.description || "a favourite"} (${A.cuisine || "home-style"})\nDinner: "${B.name}" — ${B.description || "a favourite"} (${B.cuisine || "home-style"})\nRespond ONLY in valid JSON (set isOwn:true for both): ${jsonShape}`;
+        } else if (mode === "mine" && myRecipes.length === 1) {
+          const A = myRecipes[0];
+          prompt = `Cooking assistant for a couple in Frankfurt. Today: ${today}. Season: ${season}. ${wx} ${wxHint} Seasonal veg: ${veggies.join(", ")}. Preferences: ${CUISINES.join(", ")}, vegetarian-friendly, 30-60 min. ${healthNote}\nLunch: use their recipe "${A.name}" — ${A.description||"a favourite"} (${A.cuisine||"home-style"}) — set isOwn:true. Dinner: suggest a fresh recipe — set isOwn:false.\nRespond ONLY in valid JSON: ${jsonShape}`;
+        } else {
+          prompt = `Cooking assistant for a couple in Frankfurt. Today: ${today}. Season: ${season}. ${wx} ${wxHint}\nSeasonal vegetables: ${veggies.join(", ")}. Preferences: ${CUISINES.join(", ")}, vegetarian-friendly, 30-60 min. ${healthNote}\nSuggest ONE lunch and ONE dinner. Each needs: creative name, cuisine, one delicious sentence description, key seasonal+fibre+protein-rich ingredients list, mood tag (Cosy & warming / Light & fresh / Bold & spicy / Classic comfort / Hearty & nourishing), fitting emoji, short fibre_highlight, short protein_highlight naming the plant protein source(s) with approx grams of protein per serving.\nRespond ONLY in valid JSON: ${jsonShape}`;
+        }
+
+        try {
+          const text = await callAPI(prompt);
+          setMeals(JSON.parse(text.replace(/```json|```/g, "").trim()));
+        } catch(e) { setMeals({ error: true, msg: e.message }); }
+        setLoading(false);
+      };
+
+      const getFullRecipe = async (meal, type) => {
+        setLoadingRecipe(type); setExpandedRecipe(type);
+        try {
+          const text = await callAPI(`Write a complete recipe for "${meal.name}" (${meal.cuisine}, vegetarian-friendly, high-fibre, high plant-based protein, 30-60 min, serves 2). Include: short intro highlighting fibre and protein benefits with estimated grams of plant protein per serving, full ingredients list, numbered steps, one helpful tip. Warm friendly tone.`, 1400);
+          setRecipeDetails(prev => ({ ...prev, [type]: text }));
+        } catch(e) { setRecipeDetails(prev => ({ ...prev, [type]: "Couldn't load recipe. Please try again." })); }
+        setLoadingRecipe(null);
+      };
+
+      const generateCustomRecipe = async () => {
+        if (!customPrompt.trim()) return;
+        setLoadingCustom(true); setCustomResult(null);
+        try {
+          const text = await callAPI(`You are a warm, knowledgeable cooking assistant. The user says: "${customPrompt}". Based on what they feel like eating and/or the ingredients they mention, suggest ONE recipe that is vegetarian-friendly, high in fibre, and high in plant-based protein. Write a complete recipe including: a warm intro with the recipe name and why it fits their request, estimated plant protein per serving, full ingredients list (serves 2), numbered steps, and one helpful tip. If they only listed ingredients, use as many as sensibly possible. Keep the tone warm and encouraging.`, 1400);
+          setCustomResult({ text });
+        } catch(e) { setCustomResult({ error: e.message }); }
+        setLoadingCustom(false);
+      };
+
+      const saveFavorite   = async (meal) => { const u = [...favorites.filter(f => f.name !== meal.name), { ...meal, savedOn: new Date().toLocaleDateString("en-GB") }]; setFavorites(u); await storage.set("meal-favorites", JSON.stringify(u)); };
+      const removeFavorite = async (name) => { const u = favorites.filter(f => f.name !== name); setFavorites(u); await storage.set("meal-favorites", JSON.stringify(u)); };
+      const isFav          = (name) => favorites.some(f => f.name === name);
+      const addMyRecipe    = async () => { if (!newRecipe.name.trim()) return; const u = [...myRecipes, { ...newRecipe, id: Date.now() }]; setMyRecipes(u); await storage.set("my-recipes", JSON.stringify(u)); setNewRecipe({ name:"", description:"", cuisine:"", meal_type:"either" }); setShowAddForm(false); };
+      const removeMyRecipe = async (id) => { const u = myRecipes.filter(r => r.id !== id); setMyRecipes(u); await storage.set("my-recipes", JSON.stringify(u)); };
+
+      const tryUnlock = () => {
+        if (pwInput === PASSWORD) {
+          sessionStorage.setItem("mp_unlocked", "1");
+          setUnlocked(true);
+          setPwError(false);
+          setPwInput("");
+        } else {
+          setPwError(true);
+          setPwInput("");
+        }
+      };
+      const lockApp = () => {
+        sessionStorage.removeItem("mp_unlocked");
+        setUnlocked(false);
+        setActiveTab("today");
+      };
+
+      const inp = { width:"100%", padding:"10px 14px", border:"1.5px solid #c8e6c9", borderRadius:6, fontFamily:"'DM Sans',sans-serif", fontSize:14, color:"#1b3a1f", background:"#f9fbe7", outline:"none" };
+      const C   = { headerBg:"linear-gradient(135deg,#1b5e20 0%,#2e7d32 40%,#558b2f 100%)", accent1:"#e53935", accent2:"#f9a825", green:"#2e7d32", greenMid:"#4caf50", bodyBg:"#f1f8e9", cardBg:"#ffffff", textDark:"#1b3a1f", textMid:"#4a7a4e", textLight:"#7aad7e" };
+
+      return (
+        <div style={{ minHeight:"100vh", background:C.bodyBg, fontFamily:"'Lora',Georgia,serif", color:C.textDark }}>
+          <style>{`
+            .bp{background:${C.accent1};color:#fff;border:none;padding:13px 30px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(229,57,53,.3)}
+            .bp:hover{background:#c62828;transform:translateY(-1px)}
+            .byellow{background:${C.accent2};color:#3e2000;border:none;padding:13px 30px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+            .byellow:hover{background:#f57f17;transform:translateY(-1px)}
+            .bg{background:transparent;border:2px solid ${C.green};color:${C.green};padding:10px 20px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+            .bg:hover{background:${C.green};color:#fff}
+            .bsm{background:transparent;border:1.5px solid ${C.accent1};color:${C.accent1};padding:5px 13px;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .2s}
+            .bsm:hover{background:${C.accent1};color:white}
+            .bgr{background:${C.greenMid};color:white;border:none;padding:10px 22px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s}
+            .bgr:hover{background:${C.green}}
+            .bgr:disabled{opacity:.4;cursor:not-allowed}
+            .bpurple{background:#7b1fa2;color:white;border:none;padding:12px 26px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(123,31,162,.25)}
+            .bpurple:hover{background:#6a1b9a;transform:translateY(-1px)}
+            .bpurple:disabled{opacity:.4;cursor:not-allowed}
+            .card{background:${C.cardBg};border-radius:14px;padding:26px;box-shadow:0 2px 14px rgba(46,125,50,.1);border:1px solid #e8f5e9;transition:box-shadow .2s;margin-bottom:18px}
+            .card:hover{box-shadow:0 5px 24px rgba(46,125,50,.16)}
+            .tab{background:none;border:none;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;color:${C.textMid};cursor:pointer;padding:10px 12px;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap}
+            .tab.active{color:${C.green};border-bottom-color:${C.accent1};font-weight:600}
+            .tag{display:inline-block;padding:4px 11px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500}
+            .heart{background:none;border:none;cursor:pointer;font-size:20px;padding:4px;transition:transform .15s}
+            .heart:hover{transform:scale(1.2)}
+            .rtxt{font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.8;color:#2a4a2e;white-space:pre-wrap}
+            .spin{width:26px;height:26px;border:3px solid #c8e6c9;border-top-color:${C.green};border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
+            @keyframes sp{to{transform:rotate(360deg)}}
+            .fi{animation:fi .4s ease}
+            @keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+            .rrow{display:flex;justify-content:space-between;align-items:flex-start;padding:13px 0;border-bottom:1px solid #e8f5e9;gap:12px}
+            .rrow:last-child{border-bottom:none}
+            input:focus,select:focus,textarea:focus{border-color:${C.green}!important;background:#fff!important;outline:none}
+            .fibre-badge{display:flex;align-items:flex-start;gap:8px;background:linear-gradient(90deg,#e8f5e9,#f9fbe7);border:1px solid #a5d6a7;border-radius:8px;padding:9px 13px;margin-top:10px}
+            .protein-badge{display:flex;align-items:flex-start;gap:8px;background:linear-gradient(90deg,#ede7f6,#f3e5f5);border:1px solid #9fa8da;border-radius:8px;padding:9px 13px;margin-top:8px}
+            .tabs-bar{border-bottom:2px solid #c8e6c9;background:#fff;display:flex;justify-content:center;overflow-x:auto;-webkit-overflow-scrolling:touch}
+          `}</style>
+
+          {/* HEADER */}
+          <div style={{ background:C.headerBg, color:"#fff", padding:"36px 20px 32px", textAlign:"center", position:"relative", overflow:"hidden", minHeight:160 }}>
+            <ProduceCollage />
+            <div style={{ position:"relative", zIndex:2 }}>
+              <div style={{ display:"inline-flex", background:"rgba(0,0,0,.25)", borderRadius:20, padding:"4px 14px", marginBottom:10 }}>
+                <span style={{ fontSize:11, fontFamily:"'DM Sans',sans-serif", letterSpacing:"0.16em", opacity:.9, textTransform:"uppercase" }}>Your Daily Kitchen Companion</span>
+              </div>
+              <h1 style={{ margin:"0 0 4px", fontSize:"clamp(22px,5vw,38px)", fontWeight:700, textShadow:"0 2px 8px rgba(0,0,0,.3)" }}>🌿 What shall we cook today?</h1>
+              <p style={{ margin:"6px 0 14px", fontFamily:"'DM Sans',sans-serif", fontSize:14, opacity:.85 }}>Healthy · High Fibre · Plant Protein</p>
+              <div style={{ display:"flex", gap:10, justifyContent:"center", flexWrap:"wrap" }}>
+                <span style={{ background:"rgba(255,255,255,.18)", borderRadius:20, padding:"5px 13px", fontFamily:"'DM Sans',sans-serif", fontSize:12 }}>
+                  🌿 {season} · {veggies.slice(0,3).join(", ")}
+                </span>
+                {weather && (
+                  <span style={{ background:"rgba(255,255,255,.18)", borderRadius:20, padding:"5px 13px", fontFamily:"'DM Sans',sans-serif", fontSize:12 }}>
+                    {weather.desc==="sunny"?"☀️":weather.desc==="rainy"?"🌧️":weather.desc==="snowy"?"❄️":"⛅"} {weather.desc !== "unknown" ? weather.desc : ""}{weather.temp !== null ? ` · ${weather.temp}°C` : ""} · Frankfurt
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* TABS */}
+          <div className="tabs-bar">
+            <button className={`tab${activeTab==="today"?" active":""}`} onClick={()=>setActiveTab("today")}>Today's Meals</button>
+            <button className={`tab${activeTab==="custom"?" active":""}`} onClick={()=>{ if(unlocked){setActiveTab("custom");}else{setActiveTab("custom");} }}>
+              {!unlocked && "🔒 "}✨ Custom Recipe
+            </button>
+            <button className={`tab${activeTab==="myrecipes"?" active":""}`} onClick={()=>setActiveTab("myrecipes")}>
+              {!unlocked && "🔒 "}My Recipes{myRecipes.length>0 && unlocked?` (${myRecipes.length})`:""}
+            </button>
+            <button className={`tab${activeTab==="favorites"?" active":""}`} onClick={()=>setActiveTab("favorites")}>
+              {!unlocked && "🔒 "}Saved{favorites.length>0 && unlocked?` (${favorites.length})`:""}
+            </button>
+            <button className={`tab${activeTab==="conversions"?" active":""}`} onClick={()=>setActiveTab("conversions")}>📏 Conversions</button>
+            {unlocked && <button className="tab" onClick={lockApp} style={{color:"#e53935"}}>🔓 Lock</button>}
+          </div>
+
+          <div style={{ maxWidth:740, margin:"0 auto", padding:"30px 16px" }}>
+
+            {/* TODAY */}
+            {activeTab==="today" && <>
+              {!meals && !loading && (
+                <div style={{ textAlign:"center", padding:"44px 0" }}>
+                  <div style={{ fontSize:52, marginBottom:10 }}>🥗</div>
+                  <p style={{ fontStyle:"italic", color:C.textMid, marginBottom:8, fontSize:16, lineHeight:1.7 }}>
+                    Let me cook up something <strong>healthy, fibre-rich and protein-packed</strong><br/>for you and your family today!
+                  </p>
+                  {myRecipes.length > 0 && (
+                    <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.textLight, marginBottom:26 }}>
+                      You have {myRecipes.length} recipe{myRecipes.length>1?"s":""} saved — I might suggest one of those today!
+                    </p>
+                  )}
+                  <div style={{ display:"flex", gap:12, justifyContent:"center", flexWrap:"wrap" }}>
+                    <button className="bp" onClick={()=>generateMeals()}>✨ Suggest today's meals</button>
+                    {myRecipes.length > 0 && <button className="byellow" onClick={()=>generateMeals("mine")}>📖 Use my recipes today</button>}
+                  </div>
+                </div>
+              )}
+
+              {loading && (
+                <div style={{ textAlign:"center", padding:"60px 0" }}>
+                  <div style={{ display:"flex", justifyContent:"center", marginBottom:14 }}><div className="spin"/></div>
+                  <p style={{ fontFamily:"'DM Sans',sans-serif", color:C.textLight, fontStyle:"italic" }}>Finding something nourishing and delicious…</p>
+                </div>
+              )}
+
+              {meals && !meals.error && (
+                <div className="fi">
+                  <div style={{ textAlign:"center", marginBottom:18 }}>
+                    <span style={{ display:"inline-block", fontFamily:"'DM Sans',sans-serif", fontSize:12, background:suggestionMode==="mine"?"#e8f5e9":"#fff8e1", color:suggestionMode==="mine"?C.green:"#f57f17", border:`1px solid ${suggestionMode==="mine"?"#a5d6a7":"#ffe082"}`, borderRadius:20, padding:"5px 14px", fontWeight:500 }}>
+                      {suggestionMode==="mine"?"📖 From your recipe collection":"✨ Fresh AI suggestions"}
+                    </span>
+                  </div>
+
+                  {["lunch","dinner"].map(type => {
+                    const meal = meals[type];
+                    const mc   = moodColors[meal.mood] || moodColors.default;
+                    const isExp = expandedRecipe === type;
+                    return (
+                      <div key={type} className="card">
+                        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:8 }}>
+                          <div>
+                            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
+                              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, fontWeight:600, letterSpacing:"0.12em", textTransform:"uppercase", color:C.textLight }}>
+                                {type==="lunch"?"🌤 Lunch":"🌙 Dinner"}
+                              </span>
+                              {meal.isOwn && <span style={{ background:"#e8f5e9", color:C.green, fontSize:11, fontFamily:"'DM Sans',sans-serif", fontWeight:600, padding:"2px 8px", borderRadius:10, border:"1px solid #a5d6a7" }}>Your recipe</span>}
+                            </div>
+                            <h2 style={{ margin:"0 0 3px", fontSize:"clamp(17px,3vw,23px)", fontWeight:700 }}>{meal.emoji} {meal.name}</h2>
+                            <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.textLight, marginBottom:8 }}>{meal.cuisine}</div>
+                          </div>
+                          <button className="heart" onClick={()=>isFav(meal.name)?removeFavorite(meal.name):saveFavorite(meal)}>
+                            {isFav(meal.name)?"❤️":"🤍"}
+                          </button>
+                        </div>
+                        <p style={{ fontStyle:"italic", color:"#2a4a2e", marginBottom:12, lineHeight:1.65, fontSize:15 }}>{meal.description}</p>
+                        {meal.fibre_highlight && (
+                          <div className="fibre-badge">
+                            <span style={{ fontSize:18, flexShrink:0 }}>🌾</span>
+                            <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.green, lineHeight:1.5 }}>{meal.fibre_highlight}</span>
+                          </div>
+                        )}
+                        {meal.protein_highlight && (
+                          <div className="protein-badge">
+                            <span style={{ fontSize:18, flexShrink:0 }}>💪</span>
+                            <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:"#4527a0", lineHeight:1.5 }}>{meal.protein_highlight}</span>
+                          </div>
+                        )}
+                        <div style={{ display:"flex", gap:7, flexWrap:"wrap", margin:"14px 0" }}>
+                          <span className="tag" style={{ background:mc.bg, color:mc.text, border:`1px solid ${mc.border}` }}>{meal.mood}</span>
+                          {(meal.ingredients||[]).map(ing=>(
+                            <span key={ing} className="tag" style={{ background:"#f1f8e9", color:C.green, border:"1px solid #c8e6c9" }}>{ing}</span>
+                          ))}
+                        </div>
+                        <button className="bg" onClick={()=>{ if(isExp){setExpandedRecipe(null);}else if(!recipeDetails[type]){getFullRecipe(meal,type);}else{setExpandedRecipe(type);} }}>
+                          {isExp?"Hide recipe ↑":"Show full recipe ↓"}
+                        </button>
+                        {isExp && (
+                          <div style={{ marginTop:18, borderTop:"2px solid #e8f5e9", paddingTop:18 }}>
+                            {loadingRecipe===type
+                              ? <div style={{ display:"flex", alignItems:"center", gap:12 }}><div className="spin"/><span style={{ fontFamily:"'DM Sans',sans-serif", color:C.textLight, fontStyle:"italic", fontSize:14, marginLeft:10 }}>Writing the recipe…</span></div>
+                              : <div className="rtxt fi">{recipeDetails[type]}</div>
+                            }
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  <div style={{ display:"flex", gap:10, justifyContent:"center", flexWrap:"wrap", marginTop:8 }}>
+                    <button className="bg" onClick={()=>generateMeals()}>🔄 New AI suggestions</button>
+                    {myRecipes.length>0 && <button className="byellow" onClick={()=>generateMeals("mine")}>📖 Use my recipes instead</button>}
+                  </div>
+                </div>
+              )}
+
+              {meals && meals.error && (
+                <div style={{ textAlign:"center", padding:"40px 0", color:C.accent1 }}>
+                  <p>Something went wrong. Please try again!</p>
+                  {meals.msg && <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:"#888", marginTop:8 }}>{meals.msg}</p>}
+                  <button className="bp" style={{ marginTop:16 }} onClick={()=>generateMeals()}>Try again</button>
+                </div>
+              )}
+            </>}
+
+            {/* PASSWORD GATE */}
+            {PROTECTED_TABS.includes(activeTab) && !unlocked && (
+              <div className="fi" style={{ textAlign:"center", padding:"60px 20px" }}>
+                <div style={{ fontSize:48, marginBottom:12 }}>🔒</div>
+                <h2 style={{ margin:"0 0 8px", fontSize:20, fontWeight:700 }}>Private Area</h2>
+                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:14, color:"#4a7a4e", marginBottom:24, lineHeight:1.6 }}>
+                  This section is password protected.<br/>Enter your password to continue.
+                </p>
+                <div style={{ maxWidth:280, margin:"0 auto", display:"flex", flexDirection:"column", gap:12 }}>
+                  <input
+                    type="password"
+                    placeholder="Enter password"
+                    value={pwInput}
+                    onChange={e=>{setPwInput(e.target.value); setPwError(false);}}
+                    onKeyDown={e=>e.key==="Enter"&&tryUnlock()}
+                    style={{ width:"100%", padding:"12px 16px", border:`2px solid ${pwError?"#e53935":"#c8e6c9"}`, borderRadius:8, fontFamily:"'DM Sans',sans-serif", fontSize:15, outline:"none", textAlign:"center", letterSpacing:"0.1em" }}
+                    autoFocus
+                  />
+                  {pwError && <p style={{ color:"#e53935", fontFamily:"'DM Sans',sans-serif", fontSize:13, margin:0 }}>Incorrect password, try again.</p>}
+                  <button className="bgr" onClick={tryUnlock} style={{ padding:"12px" }}>Unlock 🔓</button>
+                </div>
+              </div>
+            )}
+
+            {/* CUSTOM RECIPE */}
+            {activeTab==="custom" && unlocked && (
+              <div className="fi">
+                <h2 style={{ margin:"0 0 4px", fontSize:21, fontWeight:700 }}>✨ Custom Recipe</h2>
+                <p style={{ margin:"0 0 20px", fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.textMid, lineHeight:1.6 }}>
+                  Tell me what you feel like, list ingredients you have, or both — I'll create a tailored recipe that's high in fibre and plant protein.
+                </p>
+                <div className="card" style={{ background:"linear-gradient(135deg,#f3e5f5 0%,#e8f5e9 100%)", border:"2px solid #ce93d8" }}>
+                  <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, fontWeight:600, color:"#7b1fa2", marginBottom:10 }}>
+                    💬 What do you feel like today?
+                  </div>
+                  <textarea
+                    style={{...inp, minHeight:110, resize:"vertical", border:"1.5px solid #ce93d8", background:"rgba(255,255,255,0.85)", fontSize:14, lineHeight:1.6}}
+                    placeholder={'e.g. "I have lentils, spinach, a tin of tomatoes and garlic — something warming please!"\nor: "Something Mediterranean and light, maybe with chickpeas"\nor: "I have tofu, broccoli, soy sauce and sesame oil"'}
+                    value={customPrompt}
+                    onChange={e=>setCustomPrompt(e.target.value)}
+                  />
+                  <div style={{ display:"flex", gap:10, justifyContent:"flex-end", marginTop:12, flexWrap:"wrap" }}>
+                    {customResult && <button className="bg" onClick={()=>{ setCustomResult(null); setCustomPrompt(""); }}>Clear</button>}
+                    <button className="bpurple" onClick={generateCustomRecipe} disabled={!customPrompt.trim() || loadingCustom}>
+                      {loadingCustom ? "Creating recipe…" : "🍳 Create my recipe"}
+                    </button>
+                  </div>
+                </div>
+                {loadingCustom && (
+                  <div style={{ textAlign:"center", padding:"40px 0" }}>
+                    <div className="spin" style={{ margin:"0 auto 14px" }}/>
+                    <p style={{ fontFamily:"'DM Sans',sans-serif", color:C.textLight, fontStyle:"italic" }}>Crafting your personalised recipe…</p>
+                  </div>
+                )}
+                {customResult && !customResult.error && (
+                  <div className="card fi" style={{ border:"2px solid #ce93d8" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
+                      <span style={{ fontSize:20 }}>✨</span>
+                      <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, fontWeight:600, color:"#7b1fa2", textTransform:"uppercase", letterSpacing:"0.1em" }}>Your personalised recipe</span>
+                    </div>
+                    <div className="rtxt">{customResult.text}</div>
+                  </div>
+                )}
+                {customResult && customResult.error && (
+                  <div style={{ textAlign:"center", padding:"30px 0", color:C.accent1 }}>
+                    <p>Something went wrong: {customResult.error}</p>
+                    <button className="bp" style={{ marginTop:12 }} onClick={generateCustomRecipe}>Try again</button>
+                  </div>
+                )}
+                <div style={{ marginTop:14, padding:"14px 18px", background:"#f9fbe7", borderRadius:10, border:"1px dashed #a5d6a7" }}>
+                  <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textMid, lineHeight:1.8 }}>
+                    <strong>💡 Tips for best results:</strong><br/>
+                    • List specific ingredients: "300g tofu, one courgette, half a tin of coconut milk"<br/>
+                    • Mention a mood or cuisine: "something spicy", "Italian", "quick weeknight dinner"<br/>
+                    • Say what you don't want: "no nuts", "nothing too heavy"
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* MY RECIPES */}
+            {activeTab==="myrecipes" && unlocked && (
+              <div className="fi">
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20, flexWrap:"wrap", gap:12 }}>
+                  <div>
+                    <h2 style={{ margin:0, fontSize:21, fontWeight:700 }}>My Recipe Collection</h2>
+                    <p style={{ margin:"4px 0 0", fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.textLight }}>The agent rotates these in ~40% of the time.</p>
+                  </div>
+                  <button className="bgr" onClick={()=>setShowAddForm(!showAddForm)}>{showAddForm?"Cancel":"+ Add recipe"}</button>
+                </div>
+                {showAddForm && (
+                  <div className="card fi" style={{ background:"#f9fbe7", border:"1.5px solid #c8e6c9" }}>
+                    <h3 style={{ margin:"0 0 14px", fontSize:15, fontWeight:600 }}>Add a recipe</h3>
+                    <div style={{ display:"flex", flexDirection:"column", gap:11 }}>
+                      <input style={inp} placeholder="Recipe name *" value={newRecipe.name} onChange={e=>setNewRecipe({...newRecipe,name:e.target.value})} />
+                      <textarea style={{...inp,minHeight:75,resize:"vertical"}} placeholder="Brief description (e.g. A hearty dal with cumin and lemon, packed with fibre)" value={newRecipe.description} onChange={e=>setNewRecipe({...newRecipe,description:e.target.value})} />
+                      <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
+                        <input style={{...inp,flex:1,minWidth:130}} placeholder="Cuisine (e.g. Indian)" value={newRecipe.cuisine} onChange={e=>setNewRecipe({...newRecipe,cuisine:e.target.value})} />
+                        <select style={{...inp,flex:1,minWidth:130}} value={newRecipe.meal_type} onChange={e=>setNewRecipe({...newRecipe,meal_type:e.target.value})}>
+                          <option value="either">Lunch or Dinner</option>
+                          <option value="lunch">Lunch only</option>
+                          <option value="dinner">Dinner only</option>
+                        </select>
+                      </div>
+                      <div style={{ display:"flex", gap:10, justifyContent:"flex-end" }}>
+                        <button className="bg" onClick={()=>setShowAddForm(false)}>Cancel</button>
+                        <button className="bgr" onClick={addMyRecipe} disabled={!newRecipe.name.trim()}>Save recipe</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {myRecipes.length===0 && !showAddForm && (
+                  <div style={{ textAlign:"center", padding:"60px 0", color:C.textLight }}>
+                    <div style={{ fontSize:44, marginBottom:12 }}>📖</div>
+                    <p style={{ fontStyle:"italic", lineHeight:1.7 }}>No recipes yet.<br/>Add the dishes you love and I'll rotate them into your daily suggestions!</p>
+                  </div>
+                )}
+                {myRecipes.length > 0 && (
+                  <div className="card">
+                    {myRecipes.map(r=>(
+                      <div key={r.id} className="rrow">
+                        <div style={{ flex:1 }}>
+                          <div style={{ fontWeight:600, fontSize:16, marginBottom:3 }}>{r.name}</div>
+                          {r.description && <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:14, color:C.textMid, fontStyle:"italic", lineHeight:1.5 }}>{r.description}</div>}
+                          <div style={{ marginTop:6, display:"flex", gap:7, flexWrap:"wrap" }}>
+                            {r.cuisine && <span className="tag" style={{ background:"#f1f8e9", color:C.green, border:"1px solid #c8e6c9" }}>{r.cuisine}</span>}
+                            <span className="tag" style={{ background:"#fff8e1", color:"#f57f17", border:"1px solid #ffe082" }}>
+                              {r.meal_type==="lunch"?"Lunch":r.meal_type==="dinner"?"Dinner":"Lunch or Dinner"}
+                            </span>
+                          </div>
+                        </div>
+                        <button className="bsm" onClick={()=>removeMyRecipe(r.id)}>Remove</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SAVED */}
+            {activeTab==="favorites" && unlocked && (
+              <div className="fi">
+                <h2 style={{ margin:"0 0 18px", fontSize:21, fontWeight:700 }}>Saved Recipes</h2>
+                {favorites.length===0
+                  ? <div style={{ textAlign:"center", padding:"60px 0", color:C.textLight }}>
+                      <div style={{ fontSize:40, marginBottom:12 }}>🤍</div>
+                      <p style={{ fontStyle:"italic" }}>No saved recipes yet.<br/>Tap the heart on any suggestion to save it here!</p>
+                    </div>
+                  : favorites.map(meal=>(
+                    <div key={meal.name} className="card">
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+                        <div>
+                          <h3 style={{ margin:"0 0 3px", fontSize:17, fontWeight:700 }}>{meal.emoji} {meal.name}</h3>
+                          <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.textLight }}>{meal.cuisine} · Saved {meal.savedOn}</div>
+                        </div>
+                        <button className="heart" onClick={()=>removeFavorite(meal.name)}>❤️</button>
+                      </div>
+                      <p style={{ fontStyle:"italic", color:C.textMid, marginTop:10, fontSize:14, lineHeight:1.6 }}>{meal.description}</p>
+                      {meal.fibre_highlight && (
+                        <div className="fibre-badge" style={{ marginTop:10 }}>
+                          <span style={{ fontSize:16, flexShrink:0 }}>🌾</span>
+                          <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.green, lineHeight:1.5 }}>{meal.fibre_highlight}</span>
+                        </div>
+                      )}
+                      {meal.protein_highlight && (
+                        <div className="protein-badge" style={{ marginTop:8 }}>
+                          <span style={{ fontSize:16, flexShrink:0 }}>💪</span>
+                          <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:"#4527a0", lineHeight:1.5 }}>{meal.protein_highlight}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                }
+              </div>
+            )}
+
+            {/* CONVERSIONS */}
+            {activeTab==="conversions" && <ConversionsTab C={C} inp={inp} />}
+
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<MealPlanner />);
+  </script>
+</body>
+</html>
